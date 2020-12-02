@@ -179,7 +179,7 @@ class BaseAviary(gym.Env):
                 p.configureDebugVisualizer(i, 0, physicsClientId=self.CLIENT)
             p.resetDebugVisualizerCamera(cameraDistance=3,
                                          cameraYaw=-30,
-                                         cameraPitch=-30,
+                                         cameraPitch=-90,
                                          cameraTargetPosition=[0, 0, 0],
                                          physicsClientId=self.CLIENT
                                          )
@@ -233,8 +233,8 @@ class BaseAviary(gym.Env):
         else:
             print("[ERROR] invalid initial_rpys in BaseAviary.__init__(), try initial_rpys.reshape(NUM_DRONES,3)")
         #### Create action and observation spaces ##################
-        self.action_space = self._actionSpace()
-        self.observation_space = self._observationSpace()
+        self.action_space = self._actionSpace
+        self.observation_space = self._observationSpace
         #### Housekeeping ##########################################
         self._housekeeping()
         #### Update and store the drones kinematic information #####

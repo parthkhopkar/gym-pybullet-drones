@@ -204,12 +204,14 @@ class BaseSingleAgentAviary(BaseAviary):
                            )
         elif self.ACT_TYPE == ActionType.PID: 
             state = self._getDroneStateVector(0)
+            # print(f'Drone State: {state[0:3]}')
             rpm, _, _ = self.ctrl[0].computeControl(control_timestep=self.AGGR_PHY_STEPS*self.TIMESTEP, 
                                                     cur_pos=state[0:3],
                                                     cur_quat=state[3:7],
                                                     cur_vel=state[10:13],
                                                     cur_ang_vel=state[13:16],
-                                                    target_pos=state[0:3]+0.1*action
+                                                    target_pos = [state[0],state[1],1],
+                                                    target_vel=[ac for st, ac in zip(state[0:3], action)]
                                                     )
             return rpm
         elif self.ACT_TYPE == ActionType.ONE_D_RPM:

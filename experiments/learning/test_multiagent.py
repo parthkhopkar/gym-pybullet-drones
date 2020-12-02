@@ -166,6 +166,7 @@ if __name__ == "__main__":
     #### Initialize Ray Tune ###################################
     ray.shutdown()
     ray.init(ignore_reinit_error=True)
+    print("[INIT] Initialized Ray")
 
     #### Register the custom centralized critic model ##########
     ModelCatalog.register_custom_model("cc_model", CustomTorchCentralizedCriticModel)
@@ -220,11 +221,11 @@ if __name__ == "__main__":
         print("[ERROR] environment not yet implemented")
         exit()
     observer_space = Dict({
-        "own_obs": temp_env.observation_space[0],
-        "opponent_obs": temp_env.observation_space[0],
-        "opponent_action": temp_env.action_space[0],
+        "own_obs": temp_env.observation_space()[0],
+        "opponent_obs": temp_env.observation_space()[0],
+        "opponent_action": temp_env.action_space()[0],
     })
-    action_space = temp_env.action_space[0]
+    action_space = temp_env.action_space()[0]
 
     #### Set up the trainer's config ###########################
     config = ppo.DEFAULT_CONFIG.copy() # For the default config, see github.com/ray-project/ray/blob/master/rllib/agents/trainer.py

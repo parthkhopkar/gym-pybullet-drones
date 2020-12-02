@@ -234,11 +234,11 @@ if __name__ == "__main__":
         print("[ERROR] environment not yet implemented")
         exit()
     observer_space = Dict({
-        "own_obs": temp_env.observation_space[0],
-        "opponent_obs": temp_env.observation_space[0],
-        "opponent_action": temp_env.action_space[0],
+        "own_obs": temp_env.observation_space()[0],
+        "opponent_obs": temp_env.observation_space()[0],
+        "opponent_action": temp_env.action_space()[0],
     })
-    action_space = temp_env.action_space[0]
+    action_space = temp_env.action_space()[0]
 
     #### Note ##################################################
     # RLlib will create ``num_workers + 1`` copies of the
