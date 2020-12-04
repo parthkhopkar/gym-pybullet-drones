@@ -23,7 +23,7 @@ with open('../files/chaser_data/motion_data_chaser/c0/agent2.txt', 'r') as agent
     print(len(trajectory))
     print(trajectory)
     init_x, init_y = [float(pos)/20 for pos in trajectory[0].split(' ')[0:2]]
-    env = TakeoffAviary(gui=True, record=True, act=ActionType.PID, initial_xyzs=np.array([[init_x, init_y, Z]]))
+    env = TakeoffAviary(gui=True, record=False, act=ActionType.PID, initial_xyzs=np.array([[init_x, init_y, Z]]))
 
     PYB_CLIENT = env.getPyBulletClient()
 

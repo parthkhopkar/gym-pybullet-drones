@@ -19,6 +19,7 @@ class ActionType(Enum):
     ONE_D_RPM = "one_d_rpm"     # 1D (identical input to all motors) with RPMs
     ONE_D_DYN = "one_d_dyn"     # 1D (identical input to all motors) with desired thrust and torques
     ONE_D_PID = "one_d_pid"     # 1D (identical input to all motors) with PID control
+    SIX_D_PID = "six_d_pid"     # position + velocity PID control
 
 ################################################################################
 
@@ -83,7 +84,7 @@ class BaseSingleAgentAviary(BaseAviary):
         self.ACT_TYPE = act
         self.EPISODE_LEN_SEC = 5
         #### Create integrated controllers #########################
-        if act in [ActionType.PID, ActionType.ONE_D_PID]:
+        if act in [ActionType.PID, ActionType.ONE_D_PID, ActionType.SIX_D_PID]:
             os.environ['KMP_DUPLICATE_LIB_OK']='True'
             if self.DRONE_MODEL in [DroneModel.CF2X, DroneModel.CF2P]:
                 self.ctrl = [DSLPIDControl(BaseAviary(drone_model=DroneModel.CF2X)) for i in range(self.NUM_DRONES)]
@@ -152,6 +153,8 @@ class BaseSingleAgentAviary(BaseAviary):
             size = 4
         elif self.ACT_TYPE == ActionType.PID:
             size = 3
+        elif self.ACT_TYPE == ActionType.SIX_D_PID:
+            size = 6
         elif self.ACT_TYPE in [ActionType.ONE_D_RPM, ActionType.ONE_D_DYN, ActionType.ONE_D_PID]:
             size = 1   
         else:
@@ -212,6 +215,18 @@ class BaseSingleAgentAviary(BaseAviary):
                                                     cur_ang_vel=state[13:16],
                                                     target_pos = [state[0],state[1],1],
                                                     target_vel=[ac for st, ac in zip(state[0:3], action)]
+                                                    )
+            return rpm
+        elif self.ACT_TYPE == ActionType.SIX_D_PID:
+            state = self._getDroneStateVector(0)
+            # print(f'Drone State: {state[0:3]}')
+            rpm, _, _ = self.ctrl[0].computeControl(control_timestep=self.AGGR_PHY_STEPS*self.TIMESTEP, 
+                                                    cur_pos=state[0:3],
+                                                    cur_quat=state[3:7],
+                                                    cur_vel=state[10:13],
+                                                    cur_ang_vel=state[13:16],
+                                                    target_pos = [action[0],action[1],action[2]],
+                                                    target_vel=[action[3], action[4], action[5]]
                                                     )
             return rpm
         elif self.ACT_TYPE == ActionType.ONE_D_RPM:
