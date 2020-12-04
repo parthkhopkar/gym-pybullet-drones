@@ -1,6 +1,6 @@
 """Control implementation for assignment 1.
 
-The script is used the simulation in file `aer1216_fall2020_hw1_sim.py`.
+The controller used the simulation in file `aer1216_fall2020_hw1_sim.py`.
 
 Example
 -------
@@ -46,9 +46,9 @@ class HW1Control():
         #### HOMEWORK CODE (START) #################################
         ############################################################
         ############################################################
-        self.p_coeff_position = 1.5
+        self.p_coeff_position = 0.7 * 0.7
         """float: Proportional coefficient for position control."""
-        self.d_coeff_position = 0.0
+        self.d_coeff_position = 2 * 0.7 * 0.7
         """float: Derivative coefficient for position control."""
         ############################################################
         ############################################################
