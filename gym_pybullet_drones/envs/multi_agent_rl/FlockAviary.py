@@ -59,6 +59,8 @@ class FlockAviary(BaseMultiagentAviary):
             The type of action space (1 or 3D; RPMS, thurst and torques, or waypoint with PID control)
 
         """
+        self.DRONE_MODEL = drone_model
+        self.NUM_DRONES = num_drones
         super().__init__(drone_model=drone_model,
                          num_drones=num_drones,
                          neighbourhood_radius=neighbourhood_radius,
@@ -163,7 +165,7 @@ class FlockAviary(BaseMultiagentAviary):
             Dictionary of empty dictionaries.
 
         """
-        return {i: {} for i in range(self.NUM_DRONES)}
+        return {i: self.pos[i] for i in range(self.NUM_DRONES)}
 
     ################################################################################
 
