@@ -203,7 +203,7 @@ class BaseMultiagentAviary(BaseAviary, MultiAgentEnv):
                                                         cur_quat=state[3:7],
                                                         cur_vel=state[10:13],
                                                         cur_ang_vel=state[13:16],
-                                                        target_pos = [state[0],state[1],0.8],
+                                                        target_pos = [state[0],state[1],0.5],
                                                         target_vel=[ac for st, ac in zip(state[0:3], v)]
                                                         )
                 rpm[int(k),:] = rpm_k

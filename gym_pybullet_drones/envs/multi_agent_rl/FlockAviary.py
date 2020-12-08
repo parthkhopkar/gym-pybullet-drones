@@ -165,7 +165,7 @@ class FlockAviary(BaseMultiagentAviary):
             Dictionary of empty dictionaries.
 
         """
-        return {i: self.pos[i] for i in range(self.NUM_DRONES)}
+        return {i: {'position': self.pos[i], 'velocity': self.vel[i]} for i in range(self.NUM_DRONES)}
 
     ################################################################################
 

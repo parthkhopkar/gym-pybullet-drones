@@ -21,21 +21,21 @@ from swarms import Environment2D, Boid, Goal, Sphere
 Z = 0.5
 ENV_NORM = 20
 DT = 0.3
-CTRL_FREQ = int(DT*240)
 init_x, init_y = -1, 0
+goal_x, goal_y = 1, 1
 # Create Swarms env
 # TODO: Get actual env bounds
 env2d = Environment2D([20, 20, 20, 20])
-env2d.add_agent(Boid([init_x, init_y], ndim=2, max_speed = 8))
-env2d.add_goal(Goal([1,1], ndim=2))
-env2d.add_obstacle(Sphere(size=0.8, position=[0.5,0.5], ndim=2))
+env2d.add_agent(Boid([init_x, init_y], ndim=2, size=0.06, max_speed = 8, max_acceleration=5))
+env2d.add_goal(Goal([goal_x, goal_y], ndim=2))
+# env2d.add_obstacle(Sphere(size=0.8, position=[0.5,0.5], ndim=2))
 
 
-env = TakeoffAviary(gui=True, record=True, act=ActionType.PID, initial_xyzs=np.array([[init_x, init_y, 0.8]]))
+env = TakeoffAviary(gui=True, record=False, act=ActionType.PID, initial_xyzs=np.array([[init_x, init_y, 0.8]]))
 
 PYB_CLIENT = env.getPyBulletClient()
 
-p.loadURDF("sphere2.urdf", [0.5,0.5,0.5], 	useFixedBase=1, physicsClientId=PYB_CLIENT)
+# p.loadURDF("sphere2.urdf", [0.5,0.5,0.5], 	useFixedBase=1, physicsClientId=PYB_CLIENT) 
 p.loadURDF("duck_vhacd.urdf", [1,1,0.05],  physicsClientId=PYB_CLIENT)
 
 print("[INFO] Action space:", env.action_space)
@@ -48,6 +48,7 @@ for i in range(20*env.SIM_FREQ):
     vel_x, vel_y = env2d.population[0].velocity
     obs, reward, done, info = env.step([vel_x, vel_y, 0])
     env2d.population[0].position = info["drone_pos"][0][:2]
+    env2d.population[0].velocity = info["drone_vel"][0][:2]
     if i%env.SIM_FREQ == 0:
         env.render()
         print(done)

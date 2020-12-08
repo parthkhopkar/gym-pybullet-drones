@@ -109,7 +109,7 @@ class TakeoffAviary(BaseSingleAgentAviary):
             Dummy value.
 
         """
-        return {"answer": 42, "drone_pos": self.pos} #### Calculated by the Deep Thought supercomputer in 7.5M years
+        return {"answer": 42, "drone_pos": self.pos, "drone_vel": self.vel} #### Calculated by the Deep Thought supercomputer in 7.5M years
 
     ################################################################################
     
