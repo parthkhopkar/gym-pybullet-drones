@@ -18,7 +18,7 @@ from gym_pybullet_drones.envs.single_agent_rl.BaseSingleAgentAviary import Actio
 
 from swarms import Environment2D, Boid, Goal, Sphere
 
-Z = 0.5
+Z = 0.8
 ENV_NORM = 20
 DT = 0.3
 init_x, init_y = -1, 0
@@ -47,8 +47,8 @@ for i in range(20*env.SIM_FREQ):
     env2d.update(DT)
     vel_x, vel_y = env2d.population[0].velocity
     obs, reward, done, info = env.step([vel_x, vel_y, 0])
-    env2d.population[0].position = info["drone_pos"][0][:2]
-    env2d.population[0].velocity = info["drone_vel"][0][:2]
+    env2d.population[0].position = info["position"][0][:2]
+    env2d.population[0].velocity = info["velocity"][0][:2]
     if i%env.SIM_FREQ == 0:
         env.render()
         print(done)

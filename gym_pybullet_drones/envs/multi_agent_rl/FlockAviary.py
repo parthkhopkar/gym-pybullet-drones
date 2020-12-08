@@ -59,6 +59,7 @@ class FlockAviary(BaseMultiagentAviary):
             The type of action space (1 or 3D; RPMS, thurst and torques, or waypoint with PID control)
 
         """
+        # SWARMS: Add next 2 lines to make PID control work
         self.DRONE_MODEL = drone_model
         self.NUM_DRONES = num_drones
         super().__init__(drone_model=drone_model,
@@ -165,6 +166,7 @@ class FlockAviary(BaseMultiagentAviary):
             Dictionary of empty dictionaries.
 
         """
+        # SWARMS: Added position and velocity return to info
         return {i: {'position': self.pos[i], 'velocity': self.vel[i]} for i in range(self.NUM_DRONES)}
 
     ################################################################################

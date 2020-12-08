@@ -178,7 +178,7 @@ class BaseAviary(gym.Env):
             for i in [p.COV_ENABLE_RGB_BUFFER_PREVIEW, p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW]:
                 p.configureDebugVisualizer(i, 0, physicsClientId=self.CLIENT)
             p.resetDebugVisualizerCamera(cameraDistance=3,
-                                         cameraYaw=-30,
+                                         cameraYaw=-30,  # SWARMS: Change yaw, pitch and target position for view change
                                          cameraPitch=-90,
                                          cameraTargetPosition=[0.5, 0.5, 0],
                                          physicsClientId=self.CLIENT

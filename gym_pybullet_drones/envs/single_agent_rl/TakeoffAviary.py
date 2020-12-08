@@ -49,6 +49,7 @@ class TakeoffAviary(BaseSingleAgentAviary):
             The type of action space (1 or 3D; RPMS, thurst and torques, or waypoint with PID control)
 
         """
+        # SWARMS: Add next 2 lines to make PID control work
         self.DRONE_MODEL = drone_model
         self.NUM_DRONES = 1
         super().__init__(drone_model=drone_model,
@@ -109,7 +110,7 @@ class TakeoffAviary(BaseSingleAgentAviary):
             Dummy value.
 
         """
-        return {"answer": 42, "drone_pos": self.pos, "drone_vel": self.vel} #### Calculated by the Deep Thought supercomputer in 7.5M years
+        return {"answer": 42, "position": self.pos, "velocity": self.vel} #### Calculated by the Deep Thought supercomputer in 7.5M years
 
     ################################################################################
     
