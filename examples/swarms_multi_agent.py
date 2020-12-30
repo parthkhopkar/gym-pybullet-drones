@@ -23,8 +23,10 @@ from swarms import Environment2D, Boid, Goal, Sphere
 # needs to be set in Base{Single,Multi}agentAviary.py
 Z = 0.8
 # Number of entries in the list determines number of drones
-initial_positions = [[0,0,Z], [1,0,Z], [0,1,Z]]
-goal_x, goal_y = 1,1
+initial_positions = [[0,0,Z], [-0.5,0,Z], [0,-0.5,Z]]
+goal_x, goal_y = 1, 1
+obstacle_x, obstacle_y = 0.5, 0.5
+obstacle_present = True
 # Create Swarms env
 # TODO: Get actual env bounds
 env2d = Environment2D([20, 20, 20, 20])
@@ -32,7 +34,8 @@ env2d = Environment2D([20, 20, 20, 20])
 for position in initial_positions:
     env2d.add_agent(Boid(position[:2], ndim=2, size=0.06, max_speed = 10, max_acceleration=5))
 env2d.add_goal(Goal([goal_x, goal_y], ndim=2))
-# env2d.add_obstacle(Sphere(size=0.3, position=[0.5,0.5], ndim=2))
+if obstacle_present:
+    env2d.add_obstacle(Sphere(size=0.3, position=[obstacle_x, obstacle_y], ndim=2))
 
 
 env = FlockAviary(gui=True, record=False, num_drones=len(initial_positions), act=ActionType.PID, initial_xyzs=np.array(initial_positions))
@@ -40,7 +43,8 @@ DT = 1/env.SIM_FREQ
 PYB_CLIENT = env.getPyBulletClient()
 
 # Initialize obstacle and goal in the drone env
-# p.loadURDF("sphere2.urdf", [0.5,0.5,0.5], 	useFixedBase=1, physicsClientId=PYB_CLIENT)
+if obstacle_present:
+    p.loadURDF("sphere2.urdf", [obstacle_x, obstacle_y,0.5], globalScaling = 0.5, useFixedBase=1, physicsClientId=PYB_CLIENT)
 p.loadURDF("duck_vhacd.urdf", [goal_x, goal_y,0.05],  physicsClientId=PYB_CLIENT)
 
 print("[INFO] Action space:", env.action_space)
@@ -49,7 +53,7 @@ print("[INFO] Observation space:", env.observation_space)
 start = time.time()
 # Initialize action dict, (x,y,z) velocity PID control
 action = {i:[0,0,0] for i in range(len(env2d.population))}
-for i in range(20*env.SIM_FREQ):
+for i in range(30*env.SIM_FREQ):
     env2d.update(DT)
     # Get velocity from Swarms
     for agent in range(len(env2d.population)):
