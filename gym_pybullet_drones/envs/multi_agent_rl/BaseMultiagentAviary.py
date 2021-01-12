@@ -75,10 +75,10 @@ class BaseMultiagentAviary(BaseAviary, MultiAgentEnv):
         #### Create integrated controllers #########################
         if act in [ActionType.PID, ActionType.ONE_D_PID]:
             os.environ['KMP_DUPLICATE_LIB_OK']='True'
-            if self.DRONE_MODEL in [DroneModel.CF2X, DroneModel.CF2P]:
-                self.ctrl = [DSLPIDControl(BaseAviary(drone_model=DroneModel.CF2X)) for i in range(self.NUM_DRONES)]
-            elif self.DRONE_MODEL == DroneModel.HB:
-                self.ctrl = [SimplePIDControl(BaseAviary(drone_model=DroneModel.HB)) for i in range(self.NUM_DRONES)]
+            if drone_model in [DroneModel.CF2X, DroneModel.CF2P]:
+                self.ctrl = [DSLPIDControl(drone_model=DroneModel.CF2X) for i in range(num_drones)]
+            elif drone_model == DroneModel.HB:
+                self.ctrl = [SimplePIDControl(drone_model=DroneModel.HB) for i in range(num_drones)]
         super().__init__(drone_model=drone_model,
                          num_drones=num_drones,
                          neighbourhood_radius=neighbourhood_radius,
@@ -198,7 +198,7 @@ class BaseMultiagentAviary(BaseAviary, MultiAgentEnv):
                                         )
             elif self.ACT_TYPE == ActionType.PID: 
                 state = self._getDroneStateVector(int(k))
-                rpm_k, _, _ = self.ctrl[k].computeControl(control_timestep=self.AGGR_PHY_STEPS*self.TIMESTEP, 
+                rpm_k, _, _ = self.ctrl[int(k)].computeControl(control_timestep=self.AGGR_PHY_STEPS*self.TIMESTEP, 
                                                         cur_pos=state[0:3],
                                                         cur_quat=state[3:7],
                                                         cur_vel=state[10:13],

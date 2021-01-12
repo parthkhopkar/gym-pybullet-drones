@@ -87,10 +87,10 @@ class BaseSingleAgentAviary(BaseAviary):
         #### Create integrated controllers #########################
         if act in [ActionType.PID, ActionType.ONE_D_PID, ActionType.SIX_D_PID]:
             os.environ['KMP_DUPLICATE_LIB_OK']='True'
-            if self.DRONE_MODEL in [DroneModel.CF2X, DroneModel.CF2P]:
-                self.ctrl = [DSLPIDControl(BaseAviary(drone_model=DroneModel.CF2X)) for i in range(self.NUM_DRONES)]
-            elif self.DRONE_MODEL == DroneModel.HB:
-                self.ctrl = [SimplePIDControl(BaseAviary(drone_model=DroneModel.HB)) for i in range(self.NUM_DRONES)]
+            if drone_model in [DroneModel.CF2X, DroneModel.CF2P]:
+                self.ctrl = [DSLPIDControl(drone_model=DroneModel.CF2X)]
+            elif drone_model == DroneModel.HB:
+                self.ctrl = [SimplePIDControl(drone_model=DroneModel.HB)]
         super().__init__(drone_model=drone_model,
                          num_drones=1,
                          initial_xyzs=initial_xyzs,
