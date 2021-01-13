@@ -208,7 +208,7 @@ class BaseAviary(gym.Env):
                                                                     yaw=-30,
                                                                     pitch=-30,
                                                                     roll=0,
-                                                                    cameraTargetPosition=[0, 0, 0],
+                                                                    cameraTargetPosition=[1, 1, 0],
                                                                     upAxisIndex=2,
                                                                     physicsClientId=self.CLIENT
                                                                     )

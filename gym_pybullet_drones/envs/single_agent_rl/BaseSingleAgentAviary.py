@@ -209,6 +209,10 @@ class BaseSingleAgentAviary(BaseAviary):
         elif self.ACT_TYPE == ActionType.PID: 
             state = self._getDroneStateVector(0)
             # print(f'Drone State: {state[0:3]}')
+            if np.linalg.norm(action[0:3]) != 0:
+                v_unit_vector = action[0:3] / np.linalg.norm(action[0:3])
+            else:
+                v_unit_vector = np.zeros(3)
             rpm, _, _ = self.ctrl[0].computeControl(control_timestep=self.AGGR_PHY_STEPS*self.TIMESTEP, 
                                                     cur_pos=state[0:3],
                                                     cur_quat=state[3:7],
@@ -216,7 +220,9 @@ class BaseSingleAgentAviary(BaseAviary):
                                                     cur_ang_vel=state[13:16],
                                                     # SWARMS: Changed target_pos, target_vel
                                                     target_pos = [state[0],state[1],0.8],
+                                                    target_rpy=np.array([0,0,state[9]]), # keep current yaw
                                                     target_vel=[ac for st, ac in zip(state[0:3], action)]
+                                                    # target_vel=10 * v_unit_vector
                                                     )
             return rpm
         elif self.ACT_TYPE == ActionType.SIX_D_PID:

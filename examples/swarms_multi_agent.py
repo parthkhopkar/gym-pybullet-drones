@@ -18,15 +18,23 @@ from gym_pybullet_drones.envs.single_agent_rl.BaseSingleAgentAviary import Actio
 
 from swarms import Environment2D, Boid, Goal, Sphere
 
+config = {
+        "cohesion": 0.2,
+        "separation": 2,
+        "alignment": 0.2,
+        "obstacle_avoidance": 2,
+        "goal_steering": 1000000
+    }
+Boid.set_model(config)
 # The Z position at which to intitialize the drone
 # When using velocity based PID control, same value of Z
 # needs to be set in Base{Single,Multi}agentAviary.py
 Z = 0.8
 # Number of entries in the list determines number of drones
-initial_positions = [[0,0,Z], [-0.5,0,Z], [0,-0.5,Z]]
+initial_positions = [[0,0,Z], [2,0,Z], [0,2,Z],[1.5,1.5,Z],[-1,-1,Z]]
 goal_x, goal_y = 1, 1
 obstacle_x, obstacle_y = 0.5, 0.5
-obstacle_present = True
+obstacle_present = False
 # Create Swarms env
 # TODO: Get actual env bounds
 env2d = Environment2D([20, 20, 20, 20])
@@ -65,6 +73,6 @@ for i in range(30*env.SIM_FREQ):
         env2d.population[agent].velocity = info[agent]['velocity'][:2]
     if i%env.SIM_FREQ == 0:
         env.render()
-        print(done)
+        # print(done)
     sync(i, start, env.TIMESTEP)
 env.close()
