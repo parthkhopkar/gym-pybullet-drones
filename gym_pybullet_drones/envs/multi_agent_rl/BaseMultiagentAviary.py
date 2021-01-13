@@ -61,7 +61,7 @@ class BaseMultiagentAviary(BaseAviary, MultiAgentEnv):
         obs : ObservationType, optional
             The type of observation space (kinematic information or vision)
         act : ActionType, optional
-            The type of action space (1 or 3D; RPMS, thurst and torques, or waypoint with PID control)
+            The type of action space (1 or 3D; RPMS, thurst and torques, waypoint or velocity with PID control)
 
         """
         if num_drones < 2:
@@ -73,7 +73,7 @@ class BaseMultiagentAviary(BaseAviary, MultiAgentEnv):
         self.ACT_TYPE = act
         self.EPISODE_LEN_SEC = 5
         #### Create integrated controllers #########################
-        if act in [ActionType.PID, ActionType.ONE_D_PID]:
+        if act in [ActionType.PID, ActionType.VEL, ActionType.ONE_D_PID]:
             os.environ['KMP_DUPLICATE_LIB_OK']='True'
             if drone_model in [DroneModel.CF2X, DroneModel.CF2P]:
                 self.ctrl = [DSLPIDControl(drone_model=DroneModel.CF2X) for i in range(num_drones)]
@@ -94,6 +94,9 @@ class BaseMultiagentAviary(BaseAviary, MultiAgentEnv):
                          vision_attributes=vision_attributes,
                          dynamics_attributes=dynamics_attributes
                          )
+        #### Set a limit on the maximum target speed ###############
+        if act == ActionType.VEL:
+            self.SPEED_LIMIT = 0.03 * self.MAX_SPEED_KMH * (1000/3600)
 
     ################################################################################
 
@@ -140,7 +143,7 @@ class BaseMultiagentAviary(BaseAviary, MultiAgentEnv):
             indexed by drone Id in integer format.
 
         """
-        if self.ACT_TYPE==ActionType.RPM or self.ACT_TYPE==ActionType.DYN:
+        if self.ACT_TYPE in [ActionType.RPM, ActionType.DYN, ActionType.VEL]:
             size = 4
         elif self.ACT_TYPE==ActionType.PID:
             size = 3
@@ -208,6 +211,22 @@ class BaseMultiagentAviary(BaseAviary, MultiAgentEnv):
                                                         target_vel=[ac for st, ac in zip(state[0:3], v)]
                                                         )
                 rpm[int(k),:] = rpm_k
+            elif self.ACT_TYPE == ActionType.VEL:
+                state = self._getDroneStateVector(int(k))
+                if np.linalg.norm(v[0:3]) != 0:
+                    v_unit_vector = v[0:3] / np.linalg.norm(v[0:3])
+                else:
+                    v_unit_vector = np.zeros(3)
+                temp, _, _ = self.ctrl[int(k)].computeControl(control_timestep=self.AGGR_PHY_STEPS*self.TIMESTEP, 
+                                                        cur_pos=state[0:3],
+                                                        cur_quat=state[3:7],
+                                                        cur_vel=state[10:13],
+                                                        cur_ang_vel=state[13:16],
+                                                        target_pos=state[0:3], # same as the current position
+                                                        target_rpy=np.array([0,0,state[9]]), # keep current yaw
+                                                        target_vel=self.SPEED_LIMIT * np.abs(v[3]) * v_unit_vector # target the desired velocity vector
+                                                        )
+                rpm[int(k),:] = temp
             elif self.ACT_TYPE == ActionType.ONE_D_RPM: 
                 rpm[int(k),:] = np.repeat(self.HOVER_RPM * (1+0.05*v), 4)
             elif self.ACT_TYPE == ActionType.ONE_D_DYN: 

@@ -16,6 +16,7 @@ class ActionType(Enum):
     RPM = "rpm"                 # RPMS
     DYN = "dyn"                 # Desired thrust and torques
     PID = "pid"                 # PID control
+    VEL = "vel"                 # Velocity input (using PID control)
     ONE_D_RPM = "one_d_rpm"     # 1D (identical input to all motors) with RPMs
     ONE_D_DYN = "one_d_dyn"     # 1D (identical input to all motors) with desired thrust and torques
     ONE_D_PID = "one_d_pid"     # 1D (identical input to all motors) with PID control
@@ -76,7 +77,7 @@ class BaseSingleAgentAviary(BaseAviary):
         obs : ObservationType, optional
             The type of observation space (kinematic information or vision)
         act : ActionType, optional
-            The type of action space (1 or 3D; RPMS, thurst and torques, or waypoint with PID control)
+            The type of action space (1 or 3D; RPMS, thurst and torques, waypoint or velocity with PID control)
 
         """
         vision_attributes = True if obs == ObservationType.RGB else False
@@ -85,7 +86,7 @@ class BaseSingleAgentAviary(BaseAviary):
         self.ACT_TYPE = act
         self.EPISODE_LEN_SEC = 5
         #### Create integrated controllers #########################
-        if act in [ActionType.PID, ActionType.ONE_D_PID, ActionType.SIX_D_PID]:
+        if act in [ActionType.PID, ActionType.VEL, ActionType.ONE_D_PID]:
             os.environ['KMP_DUPLICATE_LIB_OK']='True'
             if drone_model in [DroneModel.CF2X, DroneModel.CF2P]:
                 self.ctrl = [DSLPIDControl(drone_model=DroneModel.CF2X)]
@@ -105,6 +106,9 @@ class BaseSingleAgentAviary(BaseAviary):
                          vision_attributes=vision_attributes,
                          dynamics_attributes=dynamics_attributes
                          )
+        #### Set a limit on the maximum target speed ###############
+        if act == ActionType.VEL:
+            self.SPEED_LIMIT = 0.03 * self.MAX_SPEED_KMH * (1000/3600)
 
     ################################################################################
 
@@ -150,7 +154,7 @@ class BaseSingleAgentAviary(BaseAviary):
             A Box() of size 1, 3, or 3, depending on the action type.
 
         """
-        if self.ACT_TYPE == ActionType.RPM or self.ACT_TYPE == ActionType.DYN:
+        if self.ACT_TYPE in [ActionType.RPM, ActionType.DYN, ActionType.VEL]:
             size = 4
         elif self.ACT_TYPE == ActionType.PID:
             size = 3
@@ -235,6 +239,22 @@ class BaseSingleAgentAviary(BaseAviary):
                                                     cur_ang_vel=state[13:16],
                                                     target_pos = [action[0],action[1],action[2]],
                                                     target_vel=[action[3], action[4], action[5]]
+                                                    )
+            return rpm
+        elif self.ACT_TYPE == ActionType.VEL:
+            state = self._getDroneStateVector(0)
+            if np.linalg.norm(action[0:3]) != 0:
+                v_unit_vector = action[0:3] / np.linalg.norm(action[0:3])
+            else:
+                v_unit_vector = np.zeros(3)
+            rpm, _, _ = self.ctrl[0].computeControl(control_timestep=self.AGGR_PHY_STEPS*self.TIMESTEP, 
+                                                    cur_pos=state[0:3],
+                                                    cur_quat=state[3:7],
+                                                    cur_vel=state[10:13],
+                                                    cur_ang_vel=state[13:16],
+                                                    target_pos=state[0:3], # same as the current position
+                                                    target_rpy=np.array([0,0,state[9]]), # keep current yaw
+                                                    target_vel=self.SPEED_LIMIT * np.abs(action[3]) * v_unit_vector # target the desired velocity vector
                                                     )
             return rpm
         elif self.ACT_TYPE == ActionType.ONE_D_RPM:
