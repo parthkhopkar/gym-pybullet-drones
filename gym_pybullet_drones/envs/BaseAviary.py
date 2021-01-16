@@ -202,7 +202,7 @@ class BaseAviary(gym.Env):
                 #### Set the camera parameters to save frames in DIRECT mode
                 self.VID_WIDTH=int(640)
                 self.VID_HEIGHT=int(480)
-                self.FRAME_PER_SEC = 24
+                self.FRAME_PER_SEC = 20
                 self.CAPTURE_FREQ = int(self.SIM_FREQ/self.FRAME_PER_SEC)
                 self.CAM_VIEW = p.computeViewMatrixFromYawPitchRoll(distance=3,
                                                                     yaw=-30,

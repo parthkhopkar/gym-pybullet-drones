@@ -19,34 +19,40 @@ from gym_pybullet_drones.envs.single_agent_rl.BaseSingleAgentAviary import Actio
 from swarms import Environment2D, Boid, Goal, Sphere
 
 config = {
-        "cohesion": 0.2,
-        "separation": 2,
-        "alignment": 0.2,
-        "obstacle_avoidance": 2,
-        "goal_steering": 1000000
+        "cohesion": 2e5,
+        "separation": 2e5,
+        "alignment": 2e5,
+        "obstacle_avoidance": 2e6,
+        "goal_steering": 2e6
     }
 Boid.set_model(config)
 # The Z position at which to intitialize the drone
 # When using velocity based PID control, same value of Z
 # needs to be set in Base{Single,Multi}agentAviary.py
-Z = 0.8
+Z = 0.5
 # Number of entries in the list determines number of drones
-initial_positions = [[0,0,Z], [2,0,Z], [0,2,Z],[1.5,1.5,Z],[-1,-1,Z]]
-goal_x, goal_y = 1, 1
+# initial_positions = [[0,0,Z], [2,0,Z], [0,2,Z],[1.5,1.5,Z],[-0.5,0.5,Z]]
+initial_positions = [[0,1,Z], [0,1.5,Z], [0,0,Z],[0,-1,Z],[0,-1.5,Z]]
+goal_x, goal_y = 1.5, 1.5
 obstacle_x, obstacle_y = 0.5, 0.5
 obstacle_present = False
 # Create Swarms env
 # TODO: Get actual env bounds
 env2d = Environment2D([20, 20, 20, 20])
+goal = Goal([goal_x, goal_y], ndim=2)
+env2d.add_goal(goal)
 # TODO: Determine env2d config for Boids that is guaranteed to be safe for drone env
 for position in initial_positions:
-    env2d.add_agent(Boid(position[:2], ndim=2, size=0.06, max_speed = 10, max_acceleration=5))
-env2d.add_goal(Goal([goal_x, goal_y], ndim=2))
+    agent = Boid(position[:2], ndim=2, size=0.12, max_speed = 10, max_acceleration=5)
+    agent.set_goal(goal)
+    env2d.add_agent(agent)
+
+
 if obstacle_present:
-    env2d.add_obstacle(Sphere(size=0.3, position=[obstacle_x, obstacle_y], ndim=2))
+    env2d.add_obstacle(Sphere(size=1.5, position=[obstacle_x, obstacle_y], ndim=2))
 
 
-env = FlockAviary(gui=True, record=False, num_drones=len(initial_positions), act=ActionType.PID, initial_xyzs=np.array(initial_positions))
+env = FlockAviary(gui=True, record=False, num_drones=len(initial_positions), act=ActionType.PID, initial_xyzs=np.array(initial_positions), aggregate_phy_steps=int(3))
 DT = 1/env.SIM_FREQ
 PYB_CLIENT = env.getPyBulletClient()
 
@@ -61,7 +67,7 @@ print("[INFO] Observation space:", env.observation_space)
 start = time.time()
 # Initialize action dict, (x,y,z) velocity PID control
 action = {i:[0,0,0] for i in range(len(env2d.population))}
-for i in range(30*env.SIM_FREQ):
+for i in range(8*env.SIM_FREQ):
     env2d.update(DT)
     # Get velocity from Swarms
     for agent in range(len(env2d.population)):
