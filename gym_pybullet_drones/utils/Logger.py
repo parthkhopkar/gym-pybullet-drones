@@ -55,6 +55,7 @@ class Logger(object):
                                                                                                   # rpm1,
                                                                                                   # rpm2,
                                                                                                   # rpm3
+        self.goal = np.zeros((num_drones, 2, duration_sec*self.LOGGING_FREQ_HZ))
         #### Note: this is not the same order nor length ###########
         self.controls = np.zeros((num_drones, 12, duration_sec*self.LOGGING_FREQ_HZ)) #### 12 control targets: pos_x,
                                                                                                              # pos_y,
@@ -75,6 +76,7 @@ class Logger(object):
             drone: int,
             timestamp,
             state,
+            goal,
             control=np.zeros(12)
             ):
         """Logs entries for a single simulation step, of a single drone.
@@ -87,6 +89,8 @@ class Logger(object):
             Timestamp of the log in simulation clock.
         state : ndarray
             (20,)-shaped array of floats containing the drone's state.
+        goal: ndarray
+            (2,)-shaped array of floats containing the goal state
         control : ndarray, optional
             (12,)-shaped array of floats containing the drone's control target.
 
@@ -98,6 +102,7 @@ class Logger(object):
         if current_counter >= self.timestamps.shape[1]:
             self.timestamps = np.concatenate((self.timestamps, np.zeros((self.NUM_DRONES, 1))), axis=1)
             self.states = np.concatenate((self.states, np.zeros((self.NUM_DRONES, 16, 1))), axis=2)
+            self.goal = np.concatenate((self.goal, np.zeros((self.NUM_DRONES, 2, 1))), axis=2)
             self.controls = np.concatenate((self.controls, np.zeros((self.NUM_DRONES, 12, 1))), axis=2)
         #### Advance a counter is the matrices have overgrown it ###
         elif not self.PREALLOCATED_ARRAYS and self.timestamps.shape[1] > current_counter:
@@ -105,6 +110,7 @@ class Logger(object):
         #### Log the information and increase the counter ##########
         self.timestamps[drone, current_counter] = timestamp
         self.states[drone, :, current_counter] = np.hstack([state[0:3], state[10:13], state[7:10], state[13:20]])
+        self.goal[drone, :, current_counter] = goal
         self.controls[drone, :, current_counter] = control
         self.counters[drone] = current_counter + 1
 
@@ -113,9 +119,10 @@ class Logger(object):
     def save(self):
         """Save the logs to file.
         """
-        with open(os.path.dirname(os.path.abspath(__file__))+"/../../files/logs/save-flight-"+datetime.now().strftime("%m.%d.%Y_%H.%M.%S")+".npy", 'wb') as out_file:
+        with open(os.path.dirname(os.path.abspath(__file__))+"/../../files/logs/save-flight-"+datetime.now().strftime("%m.%d.%Y_%H.%M.%S.%f")+".npy", 'wb') as out_file:
             np.save(out_file, self.timestamps)
             np.save(out_file, self.states)
+            np.save(out_file, self.goal)
             np.save(out_file, self.controls)
 
     ################################################################################
