@@ -35,7 +35,7 @@ N = 5
 # initial_positions = [[0,0,Z], [2,0,Z], [0,2,Z],[1.5,1.5,Z],[-0.5,0.5,Z]]
 initial_positions = [[0,1,Z], [0,1.5,Z], [0,0,Z],[0,-0.5,Z],[0,-1,Z]]
 # initial_positions = [np.concatenate((np.random.uniform(-2,2,2), [Z])) for i in range(N)]
-goal_x, goal_y = 1.5, 1.5
+goal_x, goal_y = 1., 1.
 # goal_x, goal_y = np.random.uniform(-2,2,2)
 obstacle_x, obstacle_y = 0.5, 0.5
 obstacle_present = True
@@ -59,10 +59,10 @@ if obstacle_present:
     env2d.add_obstacle(Sphere(size=1.5, position=[obstacle_x, obstacle_y], ndim=2))
 
 
-env = FlockAviary(gui=False, record=True, num_drones=len(initial_positions), act=ActionType.PID, initial_xyzs=np.array(initial_positions), aggregate_phy_steps=int(5))
+env = FlockAviary(gui=True, record=False, num_drones=len(initial_positions), act=ActionType.PID, initial_xyzs=np.array(initial_positions), aggregate_phy_steps=int(5))
 logger = Logger(logging_freq_hz=int(env.SIM_FREQ/env.AGGR_PHY_STEPS),
                 num_drones=len(initial_positions))
-DT = 1/env.SIM_FREQ
+DT = (1/env.SIM_FREQ)
 PYB_CLIENT = env.getPyBulletClient()
 
 # Initialize obstacle and goal in the drone env
@@ -75,7 +75,7 @@ print("[INFO] Observation space:", env.observation_space)
 
 start = time.time()
 # Initialize action dict, (x,y,z) velocity PID control
-action = {i:[0,0,0] for i in range(len(env2d.population))}
+action = {i:[0.,0.,0.] for i in range(len(env2d.population))}
 for i in range(12*int(env.SIM_FREQ/env.AGGR_PHY_STEPS)):
     env2d.update(DT)
     swarms_state = []

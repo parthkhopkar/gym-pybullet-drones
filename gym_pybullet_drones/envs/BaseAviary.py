@@ -178,8 +178,8 @@ class BaseAviary(gym.Env):
             for i in [p.COV_ENABLE_RGB_BUFFER_PREVIEW, p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW]:
                 p.configureDebugVisualizer(i, 0, physicsClientId=self.CLIENT)
             p.resetDebugVisualizerCamera(cameraDistance=3.8,
-                                         cameraYaw=-30,  # SWARMS: Change yaw, pitch and target position for view change
-                                         cameraPitch=-90,
+                                         cameraYaw=-30, # 50,  # SWARMS: Change yaw, pitch and target position for view change
+                                         cameraPitch=-90, # -45,
                                          cameraTargetPosition=[1.5, 1, 0],
                                          physicsClientId=self.CLIENT
                                          )
@@ -479,12 +479,18 @@ class BaseAviary(gym.Env):
         p.setAdditionalSearchPath(pybullet_data.getDataPath(), physicsClientId=self.CLIENT)
         #### Load ground plane, drone and obstacles models #########
         self.PLANE_ID = p.loadURDF("plane.urdf", physicsClientId=self.CLIENT)
+        # Load and set grass texture to plane
+        # grass_tex_id = p.loadTexture(os.path.dirname(os.path.abspath(__file__))+'/../assets/grass-256x256.png')
+        # p.changeVisualShape(self.PLANE_ID, -1, textureUniqueId=grass_tex_id)
         self.DRONE_IDS = np.array([p.loadURDF(os.path.dirname(os.path.abspath(__file__))+"/../assets/"+self.URDF,
                                               self.INIT_XYZS[i,:],
                                               p.getQuaternionFromEuler(self.INIT_RPYS[i,:]),
                                               physicsClientId=self.CLIENT
                                               ) for i in range(self.NUM_DRONES)])
+                            
         for i in range(self.NUM_DRONES):
+            # Change drone color
+            # p.changeVisualShape(self.DRONE_IDS[i], -1, rgbaColor=[1,1,1,1])
             #### Show the frame of reference of the drone, note that ###
             #### It severly slows down the GUI #########################
             if self.GUI and self.USER_DEBUG:

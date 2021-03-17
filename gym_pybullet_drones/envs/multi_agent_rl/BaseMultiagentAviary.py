@@ -211,6 +211,7 @@ class BaseMultiagentAviary(BaseAviary, MultiAgentEnv):
                                         )
             elif self.ACT_TYPE == ActionType.PID: 
                 state = self._getDroneStateVector(int(k))
+                # print(k,v)
                 rpm_k, _, _ = self.ctrl[int(k)].computeControl(control_timestep=self.AGGR_PHY_STEPS*self.TIMESTEP, 
                                                         cur_pos=state[0:3],
                                                         cur_quat=state[3:7],
@@ -219,7 +220,10 @@ class BaseMultiagentAviary(BaseAviary, MultiAgentEnv):
                                                         # SWARMS: Changed target_pos, target_vel, added target_rpy
                                                         target_pos = [state[0],state[1],0.5],
                                                         target_rpy=np.array([0,0,state[9]]), # keep current yaw
+                                                        # target_pos = state[0:3]+0.1*v
                                                         target_vel=[ac for st, ac in zip(state[0:3], v)]
+                                                        # target_vel=np.append(state[10:12],0),
+                                                        # target_pos=state[0:3]
                                                         )
                 rpm[int(k),:] = rpm_k
             elif self.ACT_TYPE == ActionType.VEL:
